@@ -1,0 +1,17 @@
+{
+  "name": "commandqueue",
+  "version": "0.0.1",
+  "description": "A fairly simple command queue that ensures both sync and async commands are executed in sequence.",
+  "main": "./dist/commandQueue.js",
+  "scripts": {
+    "build": "./node_modules/.bin/tsc",
+    "test": "jest"
+  },
+  "author": "Oscar Yu",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^23.1.6",
+    "jest": "^23.4.1",
+    "typescript": "^2.9.2"
+  }
+}
