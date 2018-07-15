@@ -8,7 +8,6 @@ export class CommandQueue {
     private syncCommandPromise: Promise<void> = Promise.resolve();
     private queue: Command[] = [];
     private failFast: boolean;
-    private readonly barrierCommandID: string = "BARRIER_COMMAND";
 
     constructor(failFast: boolean = false) {
         this.failFast = failFast;
@@ -19,26 +18,14 @@ export class CommandQueue {
      * after all commands dispatched before are finished.
      */
     public dispatch(command: Command) {
-        if (command.ID === this.barrierCommandID) {
-            throw new Error(
-                "Cannot dispatch commands with ID: " + this.barrierCommandID
-            );
-        }
-
         this.queue.push(command);
-        this.execute();
+        this.runNext();
     }
 
     /**
      * Remove all commands matching the given command ID.
      */
-    public removeCommand(commandID: string) {
-        if (commandID === this.barrierCommandID) {
-            throw new Error(
-                "Cannot remove commands with ID: " + this.barrierCommandID
-            );
-        }
-
+    public remove(commandID: string) {
         this.queue = this.queue.filter(command => command.ID !== commandID);
     }
 
@@ -56,31 +43,18 @@ export class CommandQueue {
      * from being executed.
      */
     public clear() {
-        this.queue = this.queue.filter(command => command.ID === this.barrierCommandID);
+        this.queue = [];
     }
 
     /**
      * Return a promise which is resolved when all commands
      * dispatched before calling wait() are finished.
      */
-    public wait(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            const barrierCommand: Command = {
-                ID: this.barrierCommandID,
-                run: () => {
-                    resolve();
-                }
-            };
-            this.queue.push(barrierCommand);
-            this.execute();
-
-            setTimeout(() => {
-                reject(new Error("Wait for command queue to finish but timeout"));
-            }, 1000);
-        });
+    public async finish() {
+        await this.syncCommandPromise;
     }
 
-    private execute() {
+    private runNext() {
         if (this.queue.length === 0) {
             return;
         }

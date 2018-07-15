@@ -58,7 +58,7 @@ describe("Command Queue test suite", () => {
         commandQueue.dispatch(commandB);
         commandQueue.dispatch(commandC);
         commandQueue.dispatch(commandD);
-        await commandQueue.wait();
+        await commandQueue.finish();
         expect(commandDFinished).toBeTruthy();
     });
 
@@ -82,7 +82,7 @@ describe("Command Queue test suite", () => {
         expect(commandQueue.failFastEnabled()).toBeTruthy();
         commandQueue.dispatch(commandA);
         commandQueue.dispatch(commandB);
-        await commandQueue.wait();
+        await commandQueue.finish();
         expect(commandBFinished).toBeFalsy();
     });
 
@@ -106,7 +106,77 @@ describe("Command Queue test suite", () => {
         expect(commandQueue.failFastEnabled()).toBeFalsy();
         commandQueue.dispatch(commandA);
         commandQueue.dispatch(commandB);
-        await commandQueue.wait();
+        await commandQueue.finish();
         expect(commandBFinished).toBeTruthy();
+    });
+
+    test("waits for commands to finish", async () => {
+        let commandAFinished = false;
+        let commandBFinished = false;
+        const commandA: Command = {
+            ID: "COMMAND_A",
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    setTimeout(() => {
+                        commandAFinished = true;
+                        resolve();
+                    }, 10);
+                });
+            }
+        };
+        const commandB: Command = {
+            ID: "COMMAND_B",
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    setTimeout(() => {
+                        commandBFinished = true;
+                        resolve();
+                    }, 10);
+                });
+            }
+        };
+        const commandQueue = new CommandQueue();
+        commandQueue.dispatch(commandA);
+        await commandQueue.finish();
+        expect(commandAFinished).toBeTruthy();
+        expect(commandBFinished).toBeFalsy();
+        commandQueue.dispatch(commandB);
+        await commandQueue.finish();
+        expect(commandAFinished).toBeTruthy();
+        expect(commandBFinished).toBeTruthy();
+    });
+
+    test("removes commands matching any given command ID", async () => {
+        let commandAFinished = false;
+        let commandBFinished = false;
+        const commandA: Command = {
+            ID: "COMMAND_A",
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    setTimeout(() => {
+                        commandAFinished = true;
+                        resolve();
+                    }, 10);
+                });
+            }
+        };
+        const commandB: Command = {
+            ID: "COMMAND_B",
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    setTimeout(() => {
+                        commandBFinished = true;
+                        resolve();
+                    }, 10);
+                });
+            }
+        };
+        const commandQueue = new CommandQueue();
+        commandQueue.dispatch(commandA);
+        commandQueue.dispatch(commandB);
+        commandQueue.remove(commandB.ID);
+        await commandQueue.finish();
+        expect(commandAFinished).toBeTruthy();
+        expect(commandBFinished).toBeFalsy();
     });
 });
