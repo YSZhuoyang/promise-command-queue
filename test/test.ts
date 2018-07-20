@@ -63,6 +63,7 @@ describe("Command Queue test suite", () => {
     });
 
     test("can handle error thrown by commands and fail fast", async () => {
+        const errorLoggerSpy: jasmine.Spy = spyOn(console, 'error');
         let commandBFinished: boolean = false;
         const commandA: Command = {
             ID: "COMMAND_A",
@@ -84,9 +85,11 @@ describe("Command Queue test suite", () => {
         commandQueue.dispatch(commandB);
         await commandQueue.finish();
         expect(commandBFinished).toBeFalsy();
+        expect(errorLoggerSpy).toHaveBeenCalled();
     });
 
     test("can handle error thrown by commands and fail safe", async () => {
+        const errorLoggerSpy: jasmine.Spy = spyOn(console, 'error');
         let commandBFinished: boolean = false;
         const commandA: Command = {
             ID: "COMMAND_A",
@@ -102,12 +105,13 @@ describe("Command Queue test suite", () => {
                 commandBFinished = true;
             }
         };
-        const commandQueue = new CommandQueue(false);
+        const commandQueue: CommandQueue = new CommandQueue(false);
         expect(commandQueue.failFastEnabled()).toBeFalsy();
         commandQueue.dispatch(commandA);
         commandQueue.dispatch(commandB);
         await commandQueue.finish();
         expect(commandBFinished).toBeTruthy();
+        expect(errorLoggerSpy).toHaveBeenCalled();
     });
 
     test("waits for commands to finish", async () => {
@@ -178,5 +182,21 @@ describe("Command Queue test suite", () => {
         await commandQueue.finish();
         expect(commandAFinished).toBeTruthy();
         expect(commandBFinished).toBeFalsy();
+    });
+
+    test("handles error with custom error handler", async () => {
+        const errorGenerator: Command = {
+            ID: "ERROR_GEN",
+            run: () => {
+                throw new Error("An error");
+            },
+            errorHandler: (e: Error) => undefined
+        };
+        const handleErrorSpy: jasmine.Spy = spyOn(errorGenerator, "errorHandler");
+        const commandQueue: CommandQueue = new CommandQueue();
+        commandQueue.dispatch(errorGenerator);
+        await commandQueue.finish();
+        const expectedErrorHandled: Error = handleErrorSpy.calls.mostRecent().args[0];
+        expect(expectedErrorHandled).toEqual(new Error("An error"));
     });
 });

@@ -2,6 +2,7 @@
 export interface Command {
     readonly ID: string;
     run(): void | Promise<void>;
+    errorHandler?(e: Error): void;
 }
 
 export class CommandQueue {
@@ -55,15 +56,22 @@ export class CommandQueue {
     }
 
     private runNext() {
-        if (this.queue.length === 0) {
-            return;
-        }
-
+        let errorHandler: undefined | ((e: Error) => void);
         this.syncCommandPromise = this.syncCommandPromise.then(() => {
             const command: Command | void = this.queue.shift();
-            return command ? command.run() : undefined;
+            if (!command) {
+                return;
+            }
+
+            errorHandler = command.errorHandler;
+            return command.run();
         }).catch((e: Error) => {
-            console.log(e.message);
+            if (errorHandler) {
+                errorHandler(e);
+            } else {
+                console.error(e);
+            }
+
             if (this.failFast) {
                 this.clear();
             }
