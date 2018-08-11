@@ -1,0 +1,7 @@
+/dist
+/test-build
+/test
+.travis.yml
+jest.config.js
+tsconfig.test.json
+tsconfig.src.json

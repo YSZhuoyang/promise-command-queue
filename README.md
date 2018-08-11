@@ -6,7 +6,14 @@ A fairly simple command queue that ensures both commands containing sync code an
 
 ## How to use
 
+#### Installation
+
+npm install commandqueue --save
+npm install commandqueue@types --save-dev
+
 #### Dispatch tasks
+
+    import { Command, CommandQueue } from "commandqueue";
 
     const syncCommand = {
         ID: "SYNC_COMMAND",
