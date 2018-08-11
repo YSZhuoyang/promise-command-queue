@@ -8,12 +8,11 @@ A fairly simple command queue that ensures both commands containing sync code an
 
 #### Installation
 
-npm install commandqueue --save
-npm install commandqueue@types --save-dev
+    npm install promisecommandqueue --save
 
 #### Dispatch tasks
 
-    import { Command, CommandQueue } from "commandqueue";
+    import { Command, CommandQueue } from "promisecommandqueue";
 
     const syncCommand = {
         ID: "SYNC_COMMAND",
