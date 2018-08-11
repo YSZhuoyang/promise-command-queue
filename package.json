@@ -1,6 +1,6 @@
 {
   "name": "promisecommandqueue",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A fairly simple command queue that ensures both commands containing sync code and commands containing async code are executed in sequence, through promises chaining.",
   "main": "./dist/commandQueue.js",
   "types" : "dist/commandQueue.d.ts",
