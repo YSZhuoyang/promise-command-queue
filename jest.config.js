@@ -1,7 +1,7 @@
 
 module.exports = {
     "roots": [
-        "<rootDir>/dist/test"
+        "<rootDir>/test-build/test"
     ],
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?$",
     "moduleFileExtensions": [
@@ -12,4 +12,5 @@ module.exports = {
         "json",
         "node"
     ],
+    "testURL": "http://localhost/"
 }
