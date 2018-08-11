@@ -16,6 +16,9 @@
   },
   "license": "MIT",
   "homepage":"https://github.com/YSZhuoyang/CommandQueue/#README",
+  "bugs": {
+    "url": "https://github.com/YSZhuoyang/CommandQueue/issues"
+   },
   "devDependencies": {
     "@types/jest": "^23.3.1",
     "jest": "^23.5.0",
