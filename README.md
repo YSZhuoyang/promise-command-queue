@@ -7,6 +7,7 @@ A fairly simple command queue that ensures both commands containing sync code an
 ## How to use
 
 #### Dispatch tasks
+
     const syncCommand = {
         ID: "SYNC_COMMAND",
         run: () => {
@@ -28,13 +29,13 @@ A fairly simple command queue that ensures both commands containing sync code an
     await commandQueue.finish();
     
 #### Custom error handling
+
     const asyncCommand = {
         ID: "ASYNC_COMMAND",
         run: () => new Promise<void>((resolve, reject) => {
             // Do something ...
             resolve();
         }),
-        errorHandler: (e: Error) => console.error(e)
+        errorHandler: e => console.error(e)
     };
     const commandQueue = new CommandQueue(true); // Enable fail fast
-    
