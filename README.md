@@ -19,7 +19,6 @@ A fairly simple command queue that ensures both commands containing sync code an
         ID: "ASYNC_COMMAND",
         run: () => new Promise<void>((resolve, reject) => {
             // Do something ...
-            resolve();
         })
     };
     
@@ -34,8 +33,10 @@ A fairly simple command queue that ensures both commands containing sync code an
         ID: "ASYNC_COMMAND",
         run: () => new Promise<void>((resolve, reject) => {
             // Do something ...
-            resolve();
         }),
+        // Use a custom error handler
         errorHandler: e => console.error(e)
     };
     const commandQueue = new CommandQueue(true); // Enable fail fast
+    commandQueue.dispatch(asyncCommand);
+    await commandQueue.finish();
