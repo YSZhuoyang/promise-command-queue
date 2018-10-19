@@ -1,24 +1,33 @@
 
-export interface Command {
+export interface ICommand {
     readonly ID: string;
     run(): void | Promise<void>;
     errorHandler?(e: Error): void;
+    readonly timeoutDuration?: number;
 }
 
 export class CommandQueue {
     private syncCommandPromise: Promise<void> = Promise.resolve();
-    private queue: Command[] = [];
+    private queue: ICommand[] = [];
     private failFast: boolean;
+    private timeoutDuration: number;
+    private defaultErrorHandler: undefined | ((e: Error) => void);
 
-    constructor(failFast: boolean = false) {
+    constructor(
+        failFast: boolean = false,
+        timeoutDuration: number = 5000,
+        defaultErrorHandler?: (e: Error) => void
+    ) {
         this.failFast = failFast;
+        this.timeoutDuration = timeoutDuration;
+        this.defaultErrorHandler = defaultErrorHandler;
     }
 
     /**
      * Push a command into the command queue, which will be executed
      * after all commands dispatched before are finished.
      */
-    public dispatch(command: Command) {
+    public dispatch(command: ICommand) {
         this.queue.push(command);
         this.runNext();
     }
@@ -56,20 +65,39 @@ export class CommandQueue {
     }
 
     private runNext() {
-        let errorHandler: undefined | ((e: Error) => void);
+        let timer: number;
+        let currCommand: ICommand;
         this.syncCommandPromise = this.syncCommandPromise.then(() => {
-            const command: Command | void = this.queue.shift();
+            if (timer !== undefined) {
+                clearTimeout(timer);
+            }
+
+            const command: ICommand | void = this.queue.shift();
             if (!command) {
                 return;
             }
 
-            errorHandler = command.errorHandler;
+            const timeoutDuration: number = command.timeoutDuration
+                ? command.timeoutDuration
+                : this.timeoutDuration;
+            timer = setTimeout(() => {
+                throw new Error(`timeout after ${timeoutDuration} milliseconds`);
+            }, timeoutDuration)
+
+            currCommand = command;
+
             return command.run();
         }).catch((e: Error) => {
-            if (errorHandler) {
-                errorHandler(e);
+            if (timer !== undefined) {
+                clearTimeout(timer);
+            }
+
+            if (currCommand.errorHandler) {
+                currCommand.errorHandler(e);
+            } else if (this.defaultErrorHandler) {
+                this.defaultErrorHandler(e);
             } else {
-                console.error(e);
+                console.error(`an error occured during executing ${currCommand.ID} command`, e);
             }
 
             if (this.failFast) {

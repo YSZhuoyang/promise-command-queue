@@ -1,13 +1,13 @@
 
-import { Command, CommandQueue } from "../src/commandQueue";
+import { ICommand, CommandQueue } from "../src/commandQueue";
 
-describe("Command Queue test suite", () => {
+describe("ICommand Queue test suite", () => {
     test("can dispatch and execute commands in sequence", async () => {
         let commandAFinished: boolean = false;
         let commandBFinished: boolean = false;
         let commandCFinished: boolean = false;
         let commandDFinished: boolean = false;
-        const commandA: Command = {
+        const commandA: ICommand = {
             ID: "COMMAND_A",
             run: () => {
                 expect(commandAFinished).toBeFalsy();
@@ -17,7 +17,7 @@ describe("Command Queue test suite", () => {
                 commandAFinished = true;
             }
         };
-        const commandB: Command = {
+        const commandB: ICommand = {
             ID: "COMMAND_B",
             run: () => new Promise<void>((resolve, reject) => {
                 setTimeout(() => {
@@ -30,7 +30,7 @@ describe("Command Queue test suite", () => {
                 expect(commandDFinished).toBeFalsy();
             })
         };
-        const commandC: Command = {
+        const commandC: ICommand = {
             ID: "COMMAND_C",
             run: () => {
                 expect(commandAFinished).toBeTruthy();
@@ -40,7 +40,7 @@ describe("Command Queue test suite", () => {
                 commandCFinished = true;
             }
         };
-        const commandD: Command = {
+        const commandD: ICommand = {
             ID: "COMMAND_D",
             run: () => new Promise<void>((resolve, reject) => {
                 setTimeout(() => {
@@ -65,7 +65,7 @@ describe("Command Queue test suite", () => {
     test("can handle error thrown by commands and fail fast", async () => {
         const errorLoggerSpy: jasmine.Spy = spyOn(console, 'error');
         let commandBFinished: boolean = false;
-        const commandA: Command = {
+        const commandA: ICommand = {
             ID: "COMMAND_A",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
@@ -73,7 +73,7 @@ describe("Command Queue test suite", () => {
                 });
             }
         };
-        const commandB: Command = {
+        const commandB: ICommand = {
             ID: "COMMAND_B",
             run: () => {
                 commandBFinished = true;
@@ -91,7 +91,7 @@ describe("Command Queue test suite", () => {
     test("can handle error thrown by commands and fail safe", async () => {
         const errorLoggerSpy: jasmine.Spy = spyOn(console, 'error');
         let commandBFinished: boolean = false;
-        const commandA: Command = {
+        const commandA: ICommand = {
             ID: "COMMAND_A",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
@@ -99,7 +99,7 @@ describe("Command Queue test suite", () => {
                 });
             }
         };
-        const commandB: Command = {
+        const commandB: ICommand = {
             ID: "COMMAND_B",
             run: () => {
                 commandBFinished = true;
@@ -117,7 +117,7 @@ describe("Command Queue test suite", () => {
     test("waits for commands to finish", async () => {
         let commandAFinished = false;
         let commandBFinished = false;
-        const commandA: Command = {
+        const commandA: ICommand = {
             ID: "COMMAND_A",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
@@ -128,7 +128,7 @@ describe("Command Queue test suite", () => {
                 });
             }
         };
-        const commandB: Command = {
+        const commandB: ICommand = {
             ID: "COMMAND_B",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
@@ -153,7 +153,7 @@ describe("Command Queue test suite", () => {
     test("removes commands matching any given command ID", async () => {
         let commandAFinished = false;
         let commandBFinished = false;
-        const commandA: Command = {
+        const commandA: ICommand = {
             ID: "COMMAND_A",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
@@ -164,7 +164,7 @@ describe("Command Queue test suite", () => {
                 });
             }
         };
-        const commandB: Command = {
+        const commandB: ICommand = {
             ID: "COMMAND_B",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
@@ -185,7 +185,7 @@ describe("Command Queue test suite", () => {
     });
 
     test("handles error with custom error handler", async () => {
-        const errorGenerator: Command = {
+        const errorGenerator: ICommand = {
             ID: "ERROR_GEN",
             run: () => {
                 throw new Error("An error");

@@ -11,5 +11,5 @@ before_script:
   - npm install
 
 script:
-  - npm run build-test
-  - npm test
+  - npm run build:test
+  - npm run test:remote

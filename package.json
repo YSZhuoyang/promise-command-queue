@@ -5,9 +5,10 @@
   "main": "./dist/commandQueue.js",
   "types": "dist/commandQueue.d.ts",
   "scripts": {
-    "build-source": "./node_modules/.bin/tsc -p tsconfig.src.json",
-    "build-test": "./node_modules/.bin/tsc -p tsconfig.test.json",
-    "test": "jest --coverage --coverageReporters=text-lcov | coveralls"
+    "build": "./node_modules/.bin/tsc -p tsconfig.src.json",
+    "build:test": "./node_modules/.bin/tsc -p tsconfig.test.json",
+    "test:remote": "jest --coverage --coverageReporters=text-lcov | coveralls",
+    "test": "jest"
   },
   "author": "Oscar Yu",
   "repository": {
