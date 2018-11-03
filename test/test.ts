@@ -1,5 +1,5 @@
 
-import { ICommand, CommandQueue } from "../src/commandQueue";
+import { ICommand, CommandError, CommandQueue } from "../src/commandQueue";
 
 describe("ICommand Queue test suite", () => {
     test("can dispatch and execute commands in sequence", async () => {
@@ -69,7 +69,9 @@ describe("ICommand Queue test suite", () => {
             ID: "COMMAND_A",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
-                    setTimeout(() => reject(new Error("Executing " + commandA.ID + " failed")), 10);
+                    setTimeout(() =>
+                        reject(new CommandError("Executing " + commandA.ID + " failed", commandA.ID)),
+                    10);
                 });
             }
         };
@@ -188,15 +190,15 @@ describe("ICommand Queue test suite", () => {
         const errorGenerator: ICommand = {
             ID: "ERROR_GEN",
             run: () => {
-                throw new Error("An error");
+                throw new CommandError("An error", errorGenerator.ID);
             },
-            errorHandler: (e: Error) => undefined
+            errorHandler: (e: CommandError) => undefined
         };
         const handleErrorSpy: jasmine.Spy = spyOn(errorGenerator, "errorHandler");
         const commandQueue: CommandQueue = new CommandQueue();
         commandQueue.dispatch(errorGenerator);
         await commandQueue.finish();
-        const expectedErrorHandled: Error = handleErrorSpy.calls.mostRecent().args[0];
-        expect(expectedErrorHandled).toEqual(new Error("An error"));
+        const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
+        expect(expectedErrorHandled).toEqual(new CommandError("An error", errorGenerator.ID));
     });
 });

@@ -2,8 +2,15 @@
 export interface ICommand {
     readonly ID: string;
     run(): void | Promise<void>;
-    errorHandler?(e: Error): void;
+    errorHandler?(e: CommandError): void;
     readonly timeoutDuration?: number;
+}
+
+export class CommandError extends Error {
+    constructor(message: string, commandId: string) {
+        super(message);
+        this.name = `Error thrown in ${commandId}`;
+    }
 }
 
 export class CommandQueue {
@@ -11,16 +18,20 @@ export class CommandQueue {
     private queue: ICommand[] = [];
     private failFast: boolean;
     private timeoutDuration: number;
-    private defaultErrorHandler: undefined | ((e: Error) => void);
+    private defaultErrorHandler: (e: CommandError) => void;
 
     constructor(
         failFast: boolean = false,
         timeoutDuration: number = 5000,
-        defaultErrorHandler?: (e: Error) => void
+        defaultErrorHandler?: (e: CommandError) => void
     ) {
         this.failFast = failFast;
         this.timeoutDuration = timeoutDuration;
-        this.defaultErrorHandler = defaultErrorHandler;
+        this.defaultErrorHandler = defaultErrorHandler
+            ? defaultErrorHandler
+            : (error: CommandError) => {
+                console.error(error);
+            };
     }
 
     /**
@@ -81,23 +92,24 @@ export class CommandQueue {
                 ? command.timeoutDuration
                 : this.timeoutDuration;
             timer = setTimeout(() => {
-                throw new Error(`timeout after ${timeoutDuration} milliseconds`);
+                throw new CommandError(
+                    `timeout after ${timeoutDuration} milliseconds`,
+                    command.ID
+                );
             }, timeoutDuration)
 
             currCommand = command;
 
             return command.run();
-        }).catch((e: Error) => {
+        }).catch((e: CommandError) => {
             if (timer !== undefined) {
                 clearTimeout(timer);
             }
 
             if (currCommand.errorHandler) {
                 currCommand.errorHandler(e);
-            } else if (this.defaultErrorHandler) {
-                this.defaultErrorHandler(e);
             } else {
-                console.error(`an error occured during executing ${currCommand.ID} command`, e);
+                this.defaultErrorHandler(e);
             }
 
             if (this.failFast) {
