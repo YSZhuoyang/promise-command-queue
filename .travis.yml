@@ -8,8 +8,9 @@ cache:
     - "node_modules"
 
 before_script:
-  - npm install
+  - yarn
 
 script:
+  - npm run build
   - npm run build:test
   - npm run test:remote

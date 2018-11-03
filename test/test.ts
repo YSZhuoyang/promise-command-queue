@@ -59,6 +59,7 @@ describe("ICommand Queue test suite", () => {
         commandQueue.dispatch(commandC);
         commandQueue.dispatch(commandD);
         await commandQueue.finish();
+
         expect(commandDFinished).toBeTruthy();
     });
 
@@ -86,6 +87,7 @@ describe("ICommand Queue test suite", () => {
         commandQueue.dispatch(commandA);
         commandQueue.dispatch(commandB);
         await commandQueue.finish();
+
         expect(commandBFinished).toBeFalsy();
         expect(errorLoggerSpy).toHaveBeenCalled();
     });
@@ -151,10 +153,13 @@ describe("ICommand Queue test suite", () => {
         const commandQueue = new CommandQueue();
         commandQueue.dispatch(commandA);
         await commandQueue.finish();
+
         expect(commandAFinished).toBeTruthy();
         expect(commandBFinished).toBeFalsy();
+
         commandQueue.dispatch(commandB);
         await commandQueue.finish();
+
         expect(commandAFinished).toBeTruthy();
         expect(commandBFinished).toBeTruthy();
     });
@@ -189,8 +194,43 @@ describe("ICommand Queue test suite", () => {
         commandQueue.dispatch(commandB);
         commandQueue.remove(commandB.ID);
         await commandQueue.finish();
+
         expect(commandAFinished).toBeTruthy();
         expect(commandBFinished).toBeFalsy();
+    });
+
+    test("handles null argument passed as errors with default error handler", async () => {
+        const errorGenerator: ICommand = {
+            ID: "ERROR_GEN",
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    reject(null);
+                });
+            }
+        };
+        const commandQueue: CommandQueue = new CommandQueue();
+        commandQueue.dispatch(errorGenerator);
+        // No uncaught error should be throw.
+        await commandQueue.finish();
+    });
+
+    test("handles custom argument passed as errors with default error handler", async () => {
+        const customErr: string = "Custom error";
+        const errorGenerator: ICommand = {
+            ID: "ERROR_GEN",
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    reject(customErr);
+                });
+            }
+        };
+        const errorLoggerSpy: jasmine.Spy = spyOn(console, "error");
+        const commandQueue: CommandQueue = new CommandQueue();
+        commandQueue.dispatch(errorGenerator);
+        await commandQueue.finish();
+
+        const expectedErrorHandled: CommandError = errorLoggerSpy.calls.mostRecent().args[0];
+        expect(expectedErrorHandled).toEqual(customErr);
     });
 
     test("handles error with custom error handler", async () => {
@@ -205,6 +245,7 @@ describe("ICommand Queue test suite", () => {
         const commandQueue: CommandQueue = new CommandQueue();
         commandQueue.dispatch(errorGenerator);
         await commandQueue.finish();
+
         const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
         expect(expectedErrorHandled).toEqual(new CommandError("An error", errorGenerator.ID));
     });
@@ -225,10 +266,11 @@ describe("ICommand Queue test suite", () => {
         };
         const defaultErrorHandler = (e: CommandError) => console.error(e.toString());
         const commandQueue: CommandQueue = new CommandQueue(false, 5000, defaultErrorHandler);
-        const handleErrorSpy: jasmine.Spy = spyOn(console, "error");
+        const errorLoggerSpy: jasmine.Spy = spyOn(console, "error");
         commandQueue.dispatch(timeoutGenerator);
         await commandQueue.finish();
-        const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
+
+        const expectedErrorHandled: CommandError = errorLoggerSpy.calls.mostRecent().args[0];
         expect(expectedErrorHandled).toEqual(new CommandError(
             `timeout after ${timeoutGenerator.timeoutDuration} milliseconds`,
             timeoutGenerator.ID
@@ -254,6 +296,7 @@ describe("ICommand Queue test suite", () => {
         const commandQueue: CommandQueue = new CommandQueue();
         commandQueue.dispatch(timeoutGenerator);
         await commandQueue.finish();
+
         const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
         expect(expectedErrorHandled).toEqual(new CommandError(
             `timeout after ${timeoutGenerator.timeoutDuration} milliseconds`,
