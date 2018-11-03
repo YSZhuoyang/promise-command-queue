@@ -30,7 +30,15 @@ export class CommandQueue {
         this.defaultErrorHandler = defaultErrorHandler
             ? defaultErrorHandler
             : (error: CommandError) => {
-                console.error(error);
+                if (!error) {
+                    return;
+                }
+
+                if (typeof error.toString === "function") {
+                    console.error(error.toString());
+                } else {
+                    console.error(error);
+                }
             };
     }
 
@@ -92,10 +100,16 @@ export class CommandQueue {
                 ? command.timeoutDuration
                 : this.timeoutDuration;
             timer = setTimeout(() => {
-                throw new CommandError(
+                const timeoutErr: CommandError = new CommandError(
                     `timeout after ${timeoutDuration} milliseconds`,
                     command.ID
                 );
+
+                if (currCommand.errorHandler) {
+                    currCommand.errorHandler(timeoutErr);
+                } else {
+                    this.defaultErrorHandler(timeoutErr);
+                }
             }, timeoutDuration)
 
             currCommand = command;

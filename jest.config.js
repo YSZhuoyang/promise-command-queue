@@ -1,7 +1,7 @@
 
 module.exports = {
     "roots": [
-        "<rootDir>/test-build/test"
+        "<rootDir>/testBuild/test"
     ],
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?$",
     "moduleFileExtensions": [

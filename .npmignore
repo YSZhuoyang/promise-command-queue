@@ -1,4 +1,4 @@
-/test-build
+/testBuild
 /test
 .travis.yml
 jest.config.js

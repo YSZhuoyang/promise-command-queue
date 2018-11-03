@@ -92,12 +92,15 @@ describe("ICommand Queue test suite", () => {
 
     test("can handle error thrown by commands and fail safe", async () => {
         const errorLoggerSpy: jasmine.Spy = spyOn(console, 'error');
+        const commandAId: string = "COMMAND_A";
+        const commandAError: CommandError =
+            new CommandError(`Executing ${commandAId} failed`, commandAId);
         let commandBFinished: boolean = false;
         const commandA: ICommand = {
             ID: "COMMAND_A",
             run: () => {
                 return new Promise<void>((resolve, reject) => {
-                    setTimeout(() => reject(new Error("Executing " + commandA.ID + " failed")), 10);
+                    setTimeout(() => reject(commandAError), 10);
                 });
             }
         };
@@ -112,8 +115,12 @@ describe("ICommand Queue test suite", () => {
         commandQueue.dispatch(commandA);
         commandQueue.dispatch(commandB);
         await commandQueue.finish();
+
+        // Verify that previous commands fail does not prevent
+        // the rest commands to be executed.
         expect(commandBFinished).toBeTruthy();
-        expect(errorLoggerSpy).toHaveBeenCalled();
+        // Verify that error can be handled by the default handler
+        expect(errorLoggerSpy).toHaveBeenCalledWith(commandAError.toString());
     });
 
     test("waits for commands to finish", async () => {
@@ -200,5 +207,57 @@ describe("ICommand Queue test suite", () => {
         await commandQueue.finish();
         const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
         expect(expectedErrorHandled).toEqual(new CommandError("An error", errorGenerator.ID));
+    });
+
+    test("handles timeout error with default error handler", async () => {
+        const timeoutGenerator: ICommand = {
+            ID: "TIMEOUT_ERROR_GEN",
+            // Change deadline to 10
+            timeoutDuration: 10,
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    // Resolved after the deadline
+                    setTimeout(() => {
+                        resolve();
+                    }, 30);
+                })
+            }
+        };
+        const defaultErrorHandler = (e: CommandError) => console.error(e.toString());
+        const commandQueue: CommandQueue = new CommandQueue(false, 5000, defaultErrorHandler);
+        const handleErrorSpy: jasmine.Spy = spyOn(console, "error");
+        commandQueue.dispatch(timeoutGenerator);
+        await commandQueue.finish();
+        const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
+        expect(expectedErrorHandled).toEqual(new CommandError(
+            `timeout after ${timeoutGenerator.timeoutDuration} milliseconds`,
+            timeoutGenerator.ID
+        ).toString());
+    });
+
+    test("handles timeout error with custom error handler", async () => {
+        const timeoutGenerator: ICommand = {
+            ID: "TIMEOUT_ERROR_GEN",
+            // Change deadline to 10
+            timeoutDuration: 10,
+            run: () => {
+                return new Promise<void>((resolve, reject) => {
+                    // Resolved after the deadline
+                    setTimeout(() => {
+                        resolve();
+                    }, 30);
+                })
+            },
+            errorHandler: (e: CommandError) => undefined
+        };
+        const handleErrorSpy: jasmine.Spy = spyOn(timeoutGenerator, "errorHandler");
+        const commandQueue: CommandQueue = new CommandQueue();
+        commandQueue.dispatch(timeoutGenerator);
+        await commandQueue.finish();
+        const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent().args[0];
+        expect(expectedErrorHandled).toEqual(new CommandError(
+            `timeout after ${timeoutGenerator.timeoutDuration} milliseconds`,
+            timeoutGenerator.ID
+        ));
     });
 });
