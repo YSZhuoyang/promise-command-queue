@@ -1,4 +1,3 @@
-
 export interface ICommand {
     readonly ID: string;
     run(): void | Promise<void>;
@@ -30,16 +29,16 @@ export class CommandQueue {
         this.defaultErrorHandler = defaultErrorHandler
             ? defaultErrorHandler
             : (error: CommandError) => {
-                if (!error) {
-                    return;
-                }
+                  if (!error) {
+                      return;
+                  }
 
-                if (typeof error.toString === "function") {
-                    console.error(error.toString());
-                } else {
-                    console.error(error);
-                }
-            };
+                  if (typeof error.toString === "function") {
+                      console.error(error.toString());
+                  } else {
+                      console.error(error);
+                  }
+              };
     }
 
     /**
@@ -85,50 +84,44 @@ export class CommandQueue {
 
     private runNext() {
         let timer: number;
-        let currCommand: ICommand;
-        this.syncCommandPromise = this.syncCommandPromise.then(() => {
-            if (timer !== undefined) {
-                clearTimeout(timer);
-            }
-
-            const command: ICommand | void = this.queue.shift();
-            if (!command) {
-                return;
-            }
-
-            const timeoutDuration: number = command.timeoutDuration
-                ? command.timeoutDuration
-                : this.timeoutDuration;
-            timer = setTimeout(() => {
-                const timeoutErr: CommandError = new CommandError(
-                    `timeout after ${timeoutDuration} milliseconds`,
-                    command.ID
-                );
-
-                if (currCommand.errorHandler) {
-                    currCommand.errorHandler(timeoutErr);
-                } else {
-                    this.defaultErrorHandler(timeoutErr);
+        let errorHandler: (e: CommandError) => void;
+        this.syncCommandPromise = this.syncCommandPromise
+            .then(() => {
+                if (timer !== undefined) {
+                    clearTimeout(timer);
                 }
-            }, timeoutDuration)
 
-            currCommand = command;
+                const command: ICommand | void = this.queue.shift();
+                if (!command) {
+                    return;
+                }
 
-            return command.run();
-        }).catch((e: CommandError) => {
-            if (timer !== undefined) {
-                clearTimeout(timer);
-            }
+                const timeoutDuration: number = command.timeoutDuration
+                    ? command.timeoutDuration
+                    : this.timeoutDuration;
+                errorHandler = command.errorHandler
+                    ? command.errorHandler
+                    : this.defaultErrorHandler;
+                timer = setTimeout(() => {
+                    const timeoutErr: CommandError = new CommandError(
+                        `timeout after ${timeoutDuration} milliseconds`,
+                        command.ID
+                    );
+                    errorHandler(timeoutErr);
+                }, timeoutDuration);
 
-            if (currCommand.errorHandler) {
-                currCommand.errorHandler(e);
-            } else {
-                this.defaultErrorHandler(e);
-            }
+                return command.run();
+            })
+            .catch((e: CommandError) => {
+                if (timer !== undefined) {
+                    clearTimeout(timer);
+                }
 
-            if (this.failFast) {
-                this.clear();
-            }
-        });
+                errorHandler(e);
+
+                if (this.failFast) {
+                    this.clear();
+                }
+            });
     }
 }

@@ -5,8 +5,8 @@
 
 A fairly simple command queue that ensures both commands containing sync code and commands containing async code are executed in sequence, through promises chaining. The idea is to:
 
-* Ensure errors can always be captured and handled properly whenever they occur.
-* Separate code by encapsulating UI behaviors and associated business logic to make life easier maintaining and testing them.
+-   Ensure errors can always be captured and handled properly whenever they occur.
+-   Separate code by encapsulating UI behaviors and associated business logic to make life easier maintaining and testing them.
 
 ## How to use
 
@@ -16,24 +16,24 @@ A fairly simple command queue that ensures both commands containing sync code an
 
 #### Dispatch tasks
 
-    import { Command, CommandQueue } from "promisecommandqueue";
+    import { ICommand, CommandQueue } from "promisecommandqueue";
 
     const commandQueue = new CommandQueue();
-    
+
     const syncCommand = {
         ID: "SYNC_COMMAND",
         run: () => {
             // Do something ...
         }
     };
-    
+
     const asyncCommand = {
         ID: "ASYNC_COMMAND",
         run: () => new Promise<void>((resolve, reject) => {
             // Do something ...
         })
     };
-    
+
     commandQueue.dispatch(asyncCommand);
     commandQueue.dispatch(syncCommand);
     await commandQueue.finish();

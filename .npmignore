@@ -1,3 +1,4 @@
+/.vscode
 /testBuild
 /test
 .travis.yml
