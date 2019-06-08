@@ -108,20 +108,16 @@ export class CommandQueue {
 
                 return command.run();
             })
-            .then(() => {
-                if (timer !== undefined) {
-                    clearTimeout(timer);
-                }
-            })
             .catch((e: CommandError) => {
-                if (timer !== undefined) {
-                    clearTimeout(timer);
-                }
-
                 errorHandler(e);
 
                 if (this.failFast) {
                     this.clear();
+                }
+            })
+            .then(() => {
+                if (timer !== undefined) {
+                    clearTimeout(timer);
                 }
             });
     }
