@@ -87,10 +87,6 @@ export class CommandQueue {
         let errorHandler: (e: CommandError) => void;
         this.syncCommandPromise = this.syncCommandPromise
             .then(() => {
-                if (timer !== undefined) {
-                    clearTimeout(timer);
-                }
-
                 const command: ICommand | void = this.queue.shift();
                 if (!command) {
                     return;
@@ -111,6 +107,11 @@ export class CommandQueue {
                 }, timeoutDuration);
 
                 return command.run();
+            })
+            .then(() => {
+                if (timer !== undefined) {
+                    clearTimeout(timer);
+                }
             })
             .catch((e: CommandError) => {
                 if (timer !== undefined) {

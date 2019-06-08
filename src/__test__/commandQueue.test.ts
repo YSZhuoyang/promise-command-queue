@@ -1,4 +1,4 @@
-import { ICommand, CommandError, CommandQueue } from "../src/commandQueue";
+import { ICommand, CommandError, CommandQueue } from "../commandQueue";
 
 describe("ICommand Queue test suite", () => {
     test("can dispatch and execute commands in sequence", async () => {
@@ -65,7 +65,9 @@ describe("ICommand Queue test suite", () => {
     });
 
     test("can handle error thrown by commands and fail fast", async () => {
-        const errorLoggerSpy: jasmine.Spy = spyOn(console, "error");
+        const errorLoggerSpy = jest
+            .spyOn(console, "error")
+            .mockImplementation(() => undefined);
         let commandBFinished: boolean = false;
         const commandA: ICommand = {
             ID: "COMMAND_A",
@@ -101,7 +103,9 @@ describe("ICommand Queue test suite", () => {
     });
 
     test("can handle error thrown by commands and fail safe", async () => {
-        const errorLoggerSpy: jasmine.Spy = spyOn(console, "error");
+        const errorLoggerSpy = jest
+            .spyOn(console, "error")
+            .mockImplementation(() => undefined);
         const commandAId: string = "COMMAND_A";
         const commandAError: CommandError = new CommandError(
             `Executing ${commandAId} failed`,
@@ -234,14 +238,14 @@ describe("ICommand Queue test suite", () => {
                 });
             }
         };
-        const errorLoggerSpy: jasmine.Spy = spyOn(console, "error");
+        const errorLoggerSpy = jest
+            .spyOn(console, "error")
+            .mockImplementation(() => undefined);
         const commandQueue: CommandQueue = new CommandQueue();
         commandQueue.dispatch(errorGenerator);
         await commandQueue.finish();
 
-        const expectedErrorHandled: CommandError = errorLoggerSpy.calls.mostRecent()
-            .args[0];
-        expect(expectedErrorHandled).toEqual(customErr);
+        expect(errorLoggerSpy).lastCalledWith(customErr);
     });
 
     test("handles error with custom error handler", async () => {
@@ -252,24 +256,19 @@ describe("ICommand Queue test suite", () => {
             },
             errorHandler: (e: CommandError) => undefined
         };
-        const handleErrorSpy: jasmine.Spy = spyOn(
-            errorGenerator,
-            "errorHandler"
-        );
+        const handleErrorSpy = jest.spyOn(errorGenerator, "errorHandler");
         const commandQueue: CommandQueue = new CommandQueue();
         commandQueue.dispatch(errorGenerator);
         await commandQueue.finish();
 
-        const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent()
-            .args[0];
-        expect(expectedErrorHandled).toEqual(
+        expect(handleErrorSpy).lastCalledWith(
             new CommandError("An error", errorGenerator.ID)
         );
     });
 
     test("handles timeout error with default error handler", async () => {
         const timeoutGenerator: ICommand = {
-            ID: "TIMEOUT_ERROR_GEN",
+            ID: "GEN_TIMEOUT_ERROR",
             // Change deadline to 10
             timeoutDuration: 10,
             run: () => {
@@ -288,13 +287,13 @@ describe("ICommand Queue test suite", () => {
             5000,
             defaultErrorHandler
         );
-        const errorLoggerSpy: jasmine.Spy = spyOn(console, "error");
+        const errorLoggerSpy = jest
+            .spyOn(console, "error")
+            .mockImplementation(() => undefined);
         commandQueue.dispatch(timeoutGenerator);
         await commandQueue.finish();
 
-        const expectedErrorHandled: CommandError = errorLoggerSpy.calls.mostRecent()
-            .args[0];
-        expect(expectedErrorHandled).toEqual(
+        expect(errorLoggerSpy).lastCalledWith(
             new CommandError(
                 `timeout after ${
                     timeoutGenerator.timeoutDuration
@@ -319,17 +318,12 @@ describe("ICommand Queue test suite", () => {
             },
             errorHandler: (e: CommandError) => undefined
         };
-        const handleErrorSpy: jasmine.Spy = spyOn(
-            timeoutGenerator,
-            "errorHandler"
-        );
+        const handleErrorSpy = jest.spyOn(timeoutGenerator, "errorHandler");
         const commandQueue: CommandQueue = new CommandQueue();
         commandQueue.dispatch(timeoutGenerator);
         await commandQueue.finish();
 
-        const expectedErrorHandled: CommandError = handleErrorSpy.calls.mostRecent()
-            .args[0];
-        expect(expectedErrorHandled).toEqual(
+        expect(handleErrorSpy).lastCalledWith(
             new CommandError(
                 `timeout after ${
                     timeoutGenerator.timeoutDuration
