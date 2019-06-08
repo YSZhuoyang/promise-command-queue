@@ -1,5 +1,5 @@
 /.vscode
-/__test__
+/src/__test__
 .travis.yml
 jest.config.js
 tsconfig.json
