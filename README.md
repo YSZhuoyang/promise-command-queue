@@ -5,8 +5,8 @@
 
 A fairly simple command queue that ensures both commands containing sync code and commands containing async code are executed in sequence, through promises chaining. The idea is to:
 
--   Ensure errors can always be captured and handled properly whenever they occur.
--   Separate code by encapsulating UI behaviors and associated business logic to make life easier maintaining and testing them.
+- Ensure errors can always be captured and handled properly whenever they occur.
+- Separate code by encapsulating UI behaviors and associated business logic to make life easier maintaining and testing them.
 
 ## How to use
 
