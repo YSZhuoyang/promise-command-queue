@@ -1,7 +1,6 @@
 /.vscode
-/testBuild
-/test
+/__test__
 .travis.yml
 jest.config.js
-tsconfig.test.json
-tsconfig.src.json
+tsconfig.json
+tsconfig.compile.json
