@@ -1,7 +1,7 @@
-# CommandQueue
+# promise-command-queue
 
-[![Build Status](https://travis-ci.org/YSZhuoyang/CommandQueue.svg?branch=master)](https://travis-ci.org/YSZhuoyang/CommandQueue)
-[![Coverage Status](https://coveralls.io/repos/github/YSZhuoyang/CommandQueue/badge.svg?branch=master)](https://coveralls.io/github/YSZhuoyang/CommandQueue?branch=master)
+[![Build Status](https://travis-ci.org/YSZhuoyang/promise-command-queue.svg?branch=master)](https://travis-ci.org/YSZhuoyang/promise-command-queue)
+[![Coverage Status](https://coveralls.io/repos/github/YSZhuoyang/promise-command-queue/badge.svg?branch=master)](https://coveralls.io/github/YSZhuoyang/promise-command-queue?branch=master)
 
 A fairly simple command queue that ensures both commands containing sync code and commands containing async code are executed in sequence, through promises chaining. The idea is to:
 
@@ -12,7 +12,7 @@ A fairly simple command queue that ensures both commands containing sync code an
 
 #### Installation
 
-    npm install promisecommandqueue --save
+    npm install promise-command-queue --save
 
 #### Dispatch tasks
 
