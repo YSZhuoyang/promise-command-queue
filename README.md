@@ -16,7 +16,7 @@ A fairly simple command queue that ensures both commands containing sync code an
 
 #### Dispatch tasks
 
-    import { ICommand, CommandQueue } from "promisecommandqueue";
+    import { ICommand, CommandQueue } from "promise-command-queue";
 
     const commandQueue = new CommandQueue();
 
