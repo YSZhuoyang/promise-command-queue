@@ -1,6 +1,7 @@
 /.vscode
-/src/__test__
+/src
 .travis.yml
 jest.config.js
 tsconfig.json
 tsconfig.compile.json
+yarn.lock
