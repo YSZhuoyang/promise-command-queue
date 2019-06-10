@@ -12,12 +12,12 @@
     "author": "Oscar Yu",
     "repository": {
         "type": "git",
-        "url": "https://github.com/YSZhuoyang/promisecommandqueue"
+        "url": "https://github.com/YSZhuoyang/promise-command-queue"
     },
     "license": "MIT",
-    "homepage": "https://github.com/YSZhuoyang/promisecommandqueue/#README",
+    "homepage": "https://github.com/YSZhuoyang/promise-command-queue/#README",
     "bugs": {
-        "url": "https://github.com/YSZhuoyang/promisecommandqueue/issues"
+        "url": "https://github.com/YSZhuoyang/promise-command-queue/issues"
     },
     "devDependencies": {
         "@types/jest": "^24.0.13",
