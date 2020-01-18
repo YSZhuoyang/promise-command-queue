@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/YSZhuoyang/promise-command-queue.svg?branch=master)](https://travis-ci.org/YSZhuoyang/promise-command-queue)
 [![Coverage Status](https://coveralls.io/repos/github/YSZhuoyang/promise-command-queue/badge.svg?branch=master)](https://coveralls.io/github/YSZhuoyang/promise-command-queue?branch=master)
 
-A fairly simple command queue that ensures both commands containing sync code and commands containing async code are executed in sequence, through promises chaining. The idea is to:
+A fairly simple command queue that ensures both commands with sync code and commands with async code are executed one by one in sequence, through promises chaining. The idea is to:
 
 - Ensure errors can always be captured and handled properly whenever they occur.
 - Separate code by encapsulating UI behaviors and associated business logic to make life easier maintaining and testing them.
