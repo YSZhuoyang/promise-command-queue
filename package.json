@@ -20,11 +20,11 @@
         "url": "https://github.com/YSZhuoyang/promise-command-queue/issues"
     },
     "devDependencies": {
-        "@types/jest": "^25.1.4",
-        "coveralls": "^3.0.9",
-        "jest": "^25.1.0",
-        "jest-circus": "^25.1.0",
-        "ts-jest": "^25.2.1",
-        "typescript": "^3.8.3"
+        "@types/jest": "^26.0.3",
+        "coveralls": "^3.1.0",
+        "jest": "^26.1.0",
+        "jest-circus": "^26.1.0",
+        "ts-jest": "^26.1.1",
+        "typescript": "^3.9.6"
     }
 }

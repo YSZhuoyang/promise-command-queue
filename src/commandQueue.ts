@@ -83,7 +83,7 @@ export class CommandQueue {
     }
 
     private runNext() {
-        let timer: number;
+        let timer: NodeJS.Timeout;
         let errorHandler: (e: CommandError) => void;
         this.syncCommandPromise = this.syncCommandPromise
             .then(() => {
