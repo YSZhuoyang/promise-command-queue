@@ -6,7 +6,7 @@
 A fairly simple command queue that ensures both commands with sync code and commands with async code are executed one by one in sequence, through promises chaining. The idea is to:
 
 - Ensure errors can always be captured and handled properly whenever they occur.
-- Encapsulate business logic associated with UI behaviors in commands which can be easily changed and tested.
+- Encapsulate business logic associated in commands which can be easily changed and tested.
 
 ## How to use
 
@@ -53,6 +53,7 @@ A fairly simple command queue that ensures both commands with sync code and comm
             console.error(e);
             // Remove commands with the given command ID when an error occurs during the execution of this command
             commandQueue.remove("commandToBeRemoved");
+        }
     };
     commandQueue.dispatch(asyncCommand);
     await commandQueue.finish();
